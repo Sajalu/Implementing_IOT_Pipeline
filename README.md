@@ -4,11 +4,12 @@
 
 
 #### 1. **Form the Project Team**
-Backend: Samir
-System administer: Abdulsalam
-Front end/Design: Krishna
-Front end/Tester: Rabin
-Project manager: Mukhtar
+- Project manager: Mukhtar
+- Backend: Samir
+- System administer: Abdulsalam
+- Front end/Design: Krishna
+- Front end/Tester: Rabin
+
 
 
 ---
