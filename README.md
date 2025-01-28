@@ -28,9 +28,6 @@
 - "Develop a reservation system integrated with IoT-enabled door systems."
 - "Enable secure real-time door access for confirmed bookings."
 - Goals for user experience (e.g., booking confirmation under 2 seconds).
-
----
-
 - The IoT component involves smart locks or door sensors that interface with the backend reservation system via access control APIs. This enables the backend to recognize reservation changes in real time and provide or restrict access based on the guest's check-in status. Guests interact with the system through the site, and the backend ensures their access rights are updated dynamically.
 - **Deliverable**: A project charter or a documented report.
 
