@@ -177,7 +177,7 @@ Real-time updates for users.
 ---
 
 Database design
-![Screenshot_2025-02-04_123749](https://hackmd.io/_uploads/S18AldkY1g.png)
+![Screenshot_2025-02-04_124832](https://hackmd.io/_uploads/BkQfUKkFJg.png)
 
 
 ---
