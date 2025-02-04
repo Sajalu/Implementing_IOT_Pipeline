@@ -71,4 +71,174 @@
 
 ---
 
+Sprint 2: System Design and Planning
 
+Objectives
+
+Clearly outline the project requirements, including specific functionalities and features.
+
+Research and identify suitable sensors for the IoT system.
+
+Select sensors based on is available from Moore.
+
+---
+
+Design the system architecture, detailing data flow, communication protocols, and integration.
+
+Plan security measures for data transmission, storage, and user authentication.
+
+Document all aspects of the project design, including system architecture and security.
+
+
+---
+
+1. Project Requirements and Functionalities
+
+The system integrates IoT-enabled door locks and sensors with a reservation system.
+
+When a guest checks in, the backend will verify their access status and allow or deny entry.
+
+---
+
+The IoT devices will communicate with the backend via access control APIs.
+
+The system ensures real-time updates on reservation status and door access.
+
+The frontend is interactive, providing real-time updates to users.
+
+---
+
+2. Sensor Research and Selection
+
+Potential Sensors for the System
+
+Magnetic Door Sensors (Reed switch) – Detects door open/close status.
+
+RFID/NFC Sensors – Allows authenticated access. (Possible)
+
+Motion Sensors – Detects movement near doors.
+
+Temperature and Humidity Sensors – Environmental monitoring.
+
+
+
+---
+
+3. System Architecture Design
+
+Edge Layer:
+
+Sensors connected to Raspberry Pi Pico for data collection.
+
+MQTT Broker facilitates communication.
+
+
+---
+
+![Screenshot_2025-02-04_123749](https://hackmd.io/_uploads/rJe0CwkYJx.png)
+
+
+---
+
+Cloud Layer:
+
+Azure IoT Hub for device management.
+
+Azure Functions for processing events.
+
+Data stored in Azure Cosmos DB.
+
+---
+
+Backend:
+
+Node.js server for business logic.
+
+Redis for caching.
+
+Payment Gateway for transactions. (mock one)
+
+Authentication using JWT/OAuth2.
+
+Docker (maybe).
+
+---
+
+Frontend:
+
+React-based UI for user interactions.
+
+API communication with the backend.
+
+Real-time updates for users.
+
+//diagram here
+
+---
+
+Database design
+![Screenshot_2025-02-04_123749](https://hackmd.io/_uploads/S18AldkY1g.png)
+
+
+---
+
+4. Security Measures
+
+Data Transmission:
+
+Enforce HTTPS for secure communication.
+
+MQTT used with TLS for secure sensor data transmission.
+
+---
+
+Authentication & Authorization:
+
+- JWT/OAuth2 authentication.
+
+---
+
+Infrastructure Security:
+
+docker for container management (If we had resources in the cloud).
+
+Role-Based Access Control (RBAC) for system resources.
+
+Regular security audits.
+
+---
+
+5. Energy Efficiency Considerations
+
+Use low-power sensors to reduce energy consumption.
+
+Sleep modes on Raspberry Pi Pico when inactive.
+
+Optimize data transmission intervals to minimize power usage.
+ 
+
+---
+
+6. Documentation of Project Design
+
+Project Overview (Objectives, requirements, and functionalities).
+
+Sensor Selection Justification (Why each sensor was chosen).
+
+System Architecture (Diagrams and explanations).
+
+Security Measures (Implemented protocols).
+
+---
+
+Selected Sensors & Order List
+
+- Magnetic Door Sensor/Reed Switch ,We have our own
+
+- RFID Reader & Tags – (name: RFID-RC522)  ,Price - 7.42 € ,Marketplace - Partco(https://www.partco.fi/fi/iot/iot-kehityskortit/nfc/24764-rfid-rc522-kit.html)
+
+- Motion Sensor  – (name: SEEED 101020793),Price - 8.24 € ,Marketplace -Partco(https://www.partco.fi/fi/rakennussarjat/grove/24685-seeed-101020793.html)
+
+- Temperature and humidity sensors - (name: SEEED 101021032),Price - 11.73 € ,Marketplace - Partco(https://www.partco.fi/fi/rakennussarjat/grove/24270-seeed-101021032.html)
+
+End 
