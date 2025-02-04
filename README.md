@@ -71,7 +71,7 @@
 
 ---
 
-### **Sprint 2: System Design and Planning **
+### **Review of Sprint 2**
 
 Objectives
 
