@@ -1,0 +1,19 @@
+{
+  "name": "rakkaranta-holiday-village",
+  "version": "1.0.0",
+  "description": "### **Review of Sprint 1**",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node Server/server.js",
+    "dev": "nodemon Server/server.js"
+  },
+  "author": "snc",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9"
+  }
+
+}
