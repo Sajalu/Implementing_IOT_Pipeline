@@ -231,4 +231,8 @@ Selected Sensors & Order List
 
 - Temperature and humidity sensors - (name: SEEED 101021032),Price - 11.73 € ,Marketplace - Partco(https://www.partco.fi/fi/rakennussarjat/grove/24270-seeed-101021032.html)
 
+### **Overview Vedio**
+
+https://youtube.com/shorts/hPApitXGMm8?feature=share
+
 End
