@@ -235,11 +235,13 @@ Selected Sensors & Order List
 
 - Magnetic Door Sensor/Reed Switch ,We have our own
 
-- RFID Reader & Tags – (name: RFID-RC522)  ,Price - 7.42 € ,Marketplace - Partco(https://www.partco.fi/fi/iot/iot-kehityskortit/nfc/24764-rfid-rc522-kit.html)
+- RFID reader 113020002 - 125KHz ,Marketplace - https://www.elfadistrelec.fi/fi/125khz-rfid-lukija-seeed-studio-113020002/p/30069950?trackQuery=rfid&pos=5&origPos=2&origPageSize=50&track=true&sid=m1lF16qEhS&itemList=search
 
-- Motion Sensor  – (name: SEEED 101020793),Price - 8.24 € ,Marketplace -Partco(https://www.partco.fi/fi/rakennussarjat/grove/24685-seeed-101020793.html)
+-RFID Transponder6GT2600-1AD00-0AX0, Marketplace - https://www.elfadistrelec.fi/fi/rfid-transponderi-54x85x0-8mm-256b-13-56mhz-iso-15693-siemens-6gt2600-1ad00-0ax0/p/30124660?trackQuery=rfid&pos=5&origPos=3&origPageSize=50&track=true&sid=PeRDEYUDYa&itemList=search
 
-- Temperature and humidity sensors - (name: SEEED 101021032),Price - 11.73 € ,Marketplace - Partco(https://www.partco.fi/fi/rakennussarjat/grove/24270-seeed-101021032.html)
+-PIR MOTION SENSOR EKMB1310112K ,Marketplace -https://fi.farnell.com/panasonic/ekmb1310112k/pir-motion-sensor-7m-90deg-2-3/dp/3816755
+
+-Humidity and Temperature Sensor  HIH7130-021-001 ,Marketplace - https://fi.farnell.com/honeywell/hih7130-021-001/humidity-temp-sensor-40-to-100deg/dp/3408757
 
 ### **Overview of project vedio**
 
