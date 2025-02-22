@@ -13,20 +13,5 @@ const pool = new Pool({
     port: process.env.DB_PORT
 });
 
-// Function to Connect DB 
-// Function to test DB connection
-const connectDB = async () => {
-    try {
-      const client = await pool.connect();
-      console.log("PostgreSQL connected");
-      client.release(); // Release connection back to the pool
-    } catch (err) {
-      console.error("PostgreSQL connection error:", err);
-      process.exit(1);
-    }
-};
-
-// Call the function to test connection
-connectDB();
 
 export default pool;
