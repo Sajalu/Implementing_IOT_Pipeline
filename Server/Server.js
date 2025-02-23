@@ -17,17 +17,16 @@ const Limiter = rateLimit({
   max: 2, // Limit each IP to 150 requests per windowMs
   message: {
     status: 429,
-    error: "Too many requests from this IP, please try again later."},
+    error: "Too many requests from this IP, You have only 150 request in 15 min, please try again later."},
   standardHeaderss: true,
   legacyHeaders: false
 });
 
+// use rate limiting middleware
 server.use(Limiter);
 
 // GET request handler
-server.get('/', (req, res) => {
-    res.status(200).json({ message: 'WELCOME TO THE Rakkaranta-Holiday-Village SERVER.' });
-});
+
 
 // Function to  DB connection
 const connectDB = async () => {
