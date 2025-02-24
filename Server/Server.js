@@ -1,8 +1,10 @@
 // Import Express framework
 import express from 'express';
 import pool from './config/db.js';
+import userRouter from './routes/UserRoutes.js'
 import rateLimit from 'express-rate-limit';
 import 'dotenv/config';
+import router from './routes/UserRoutes.js';
 
 
 
@@ -14,7 +16,7 @@ const PORT = process.env.PORT || 4000;
 // Rate Limiting Middleware
 const Limiter = rateLimit({
   windowMs: 15 * 60 * 1000,  // 15 minutes
-  max: 2, // Limit each IP to 150 requests per windowMs
+  max: 150, // Limit each IP to 150 requests per windowMs
   message: {
     status: 429,
     error: "Too many requests from this IP, You have only 150 request in 15 min, please try again later."},
@@ -25,7 +27,10 @@ const Limiter = rateLimit({
 // use rate limiting middleware
 server.use(Limiter);
 
-// GET request handler
+
+// Add router
+
+server.use('/api', router);
 
 
 // Function to  DB connection
