@@ -1,5 +1,6 @@
 // Import Express framework
 import express from 'express';
+import cors from 'cors';
 import pool from './config/db.js';
 import userRouter from './routes/UserRoutes.js'
 import rateLimit from 'express-rate-limit';
@@ -10,6 +11,20 @@ import router from './routes/UserRoutes.js';
 
 const server = express();
 server.use(express.json());
+
+server.use(cors(
+  {
+    origin: "*", // Allows requests from any domain (public API)
+    methods: ["GET", "POST", "PUT", "DELETE"],   // Only allow these HTTP methods
+    // credentials: true, // Allows cookies and authentication headers (like JWT)
+    allowedHeaders: [ 
+      "Origin", // Allows specifying the origin of the request
+      "X-Requested-With",  // Used by AJAX requests
+      "Content-Type",   // Allows sending JSON or other data formats
+      "Authorization"  // Allows authentication headers (e.g., Bearer token for JWT)
+    ],
+  }
+))
 
 const PORT = process.env.PORT || 4000;
 
