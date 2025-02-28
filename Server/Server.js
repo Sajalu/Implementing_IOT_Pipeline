@@ -18,6 +18,8 @@ server.use(express.json());
 // HTTP Logger (Logs requests in development)
 if (process.env.NODE_ENV === 'development') {
   server.use(morgan('dev'));
+}else if (process.env.NODE_ENV === 'production') {
+  server.use(morgan('combined'));
 }
 
 // CORS Configuration
@@ -72,6 +74,7 @@ server.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await connectDB();
+    console.log(` Server is running in ${process.env.NODE_ENV} mode`);
     server.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
   } catch (error) {
     console.error(`❌ Failed to start server: ${error}`);
