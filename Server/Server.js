@@ -41,7 +41,7 @@ const limiter = rateLimit({
 });
 
 server.use(limiter);
-server.use('/api/v1', router);
+server.use('/api', router);
 
 // Database Connection
 const connectDB = async () => {
