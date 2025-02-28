@@ -1,79 +1,82 @@
-// Import Express framework
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+
 import pool from './config/db.js';
-import userRouter from './routes/UserRoutes.js'
 import rateLimit from 'express-rate-limit';
 import 'dotenv/config';
 import router from './routes/UserRoutes.js';
 
-
-
 const server = express();
+
+// Security Middlewares
+server.use(helmet());
+server.disable('x-powered-by');
 server.use(express.json());
 
-server.use(cors(
-  {
-    origin: "*", // Allows requests from any domain (public API)
-    methods: ["GET", "POST", "PUT", "DELETE"],   // Only allow these HTTP methods
-    // credentials: true, // Allows cookies and authentication headers (like JWT)
-    allowedHeaders: [ 
-      "Origin", // Allows specifying the origin of the request
-      "X-Requested-With",  // Used by AJAX requests
-      "Content-Type",   // Allows sending JSON or other data formats
-      "Authorization"  // Allows authentication headers (e.g., Bearer token for JWT)
-    ],
-  }
-))
+// HTTP Logger (Logs requests in development)
+if (process.env.NODE_ENV === 'development') {
+  server.use(morgan('dev'));
+}
 
-const PORT = process.env.PORT || 4000;
+// CORS Configuration
+server.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? process.env.CLIENT_URL : '*',
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Authorization"]
+}));
 
-// Rate Limiting Middleware
-const Limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,  // 15 minutes
-  max: 150, // Limit each IP to 150 requests per windowMs
-  message: {
-    status: 429,
-    error: "Too many requests from this IP, You have only 150 request in 15 min, please try again later."},
-  standardHeaderss: true,
+const PORT = process.env.PORT || 4001;
+
+// Rate Limiting (Prevents API abuse)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 150,
+  message: { status: 429, error: "Too many requests. Please try again later." },
+  standardHeaders: 'draft-7',
   legacyHeaders: false
 });
 
-// use rate limiting middleware
-server.use(Limiter);
+server.use(limiter);
+server.use('/api/v1', router);
 
-
-// Add router
-
-server.use('/api', router);
-
-
-// Function to  DB connection
+// Database Connection
 const connectDB = async () => {
   try {
-    await pool.query('SELECT 1');
-    console.log("✅ PostgreSQL connected successfully!");
+    const client = await pool.connect();
+    console.log("✅ PostgreSQL connected");
+    client.release();
   } catch (err) {
-    console.error("PostgreSQL connection error:", err);
+    console.error("❌ PostgreSQL connection error:", err);
     process.exit(1);
   }
 };
 
-//  function to start the server
+// 404 Handler
+server.use((req, res) => {
+  res.status(404).json({ status: 'fail', message: 'Endpoint not found' });
+});
 
-const StartServer = async () => {
-  try {
-    await connectDB()
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+// Global Error Handler
+server.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    status: 'error',
+    message: 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { error: err.message })
   });
-  
+});
+
+// Start Server
+const startServer = async () => {
+  try {
+    await connectDB();
+    server.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
   } catch (error) {
-    console.error(`Failed to start server:", ${error}`)
-    process.exit(1); //  Failure/Error (Something went wrong)
-    
+    console.error(`❌ Failed to start server: ${error}`);
+    process.exit(1);
   }
-}
+};
 
-
-StartServer();
+startServer();
