@@ -52,7 +52,7 @@ cd <project-folder>
 #### 2. Install dependencies:
 
 ```
-npm install express dotenv nodemon pg morgan helmet cors express-rate-limit
+npm install express dotenv nodemon pg morgan helmet cors express-rate-limit bcryptjs jsonwebtoken
 ```
 
 #### 3. Create a .env file and configure environment variables:
