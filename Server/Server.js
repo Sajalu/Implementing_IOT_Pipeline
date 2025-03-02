@@ -3,11 +3,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
+
 import pool from './config/db.js';
 import rateLimit from 'express-rate-limit';
 import 'dotenv/config';
 import router from './routes/UserRoutes.js';
 
+// server configuration
 const server = express();
 
 // Security Middlewares
@@ -29,6 +31,7 @@ server.use(cors({
   allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Authorization"]
 }));
 
+
 const PORT = process.env.PORT || 4001;
 
 // Rate Limiting (Prevents API abuse)
@@ -39,9 +42,10 @@ const limiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false
 });
-
 server.use(limiter);
-server.use('/api', router);
+
+// Api Routes
+server.use('/api/v1', router);
 
 // Database Connection
 const connectDB = async () => {
