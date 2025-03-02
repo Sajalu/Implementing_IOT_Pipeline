@@ -45,7 +45,7 @@ This server is developed for a hackathon project by Rakkaranta.
 #### 1. Clone the repository:
 
 ```
-git clone <repository-url>
+git clone https://github.com/Sajalu/Implementing_IOT_Pipeline/tree/login/signup
 cd <project-folder>
 ```
 
