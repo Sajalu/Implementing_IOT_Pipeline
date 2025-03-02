@@ -1,4 +1,9 @@
-import {getAllUsers,FindUserByEmail , createUser} from "../models/UserModel.js";
+import bcrypt from "bcryptjs";
+import jwt from 'jsonwebtoken';
+import {getAllUsers,FindUserByEmail ,FindUserByUsername, createUser, DeleteUserByEmail} from "../models/UserModel.js";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 
 export const Test = (req, res) => {
@@ -24,8 +29,9 @@ export const Signup = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: "Email Already Exists." });
         }
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = await createUser(username, email, password);
+        const newUser = await createUser(username, email, hashedPassword);
 
         res.status(201).json({
             user: newUser.username,
@@ -38,12 +44,27 @@ export const Signup = async (req, res) => {
 };
 
 export const Login = async (req, res) => {
+    const {email, password} = req.body;
     try {
-        const {email, password} = req.body;
+        // Find the User by email
         const user = await FindUserByEmail(email);
-        if(!user || user.password !== password) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+        if(!user) {
+            return res.status(401).json({ error: 'User Not Found.' });
         }
+
+        // compare the User Password
+        const ismatch = await bcrypt.compare(password, user.password);
+        if (!ismatch){
+            return res.status(401).json({ error: 'Wrong Password.' });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            {id: user.id, email: user.email},
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        )
+
         res.status(200).json({ 
             message: 'Login successful', 
             User: user.username,
@@ -52,5 +73,27 @@ export const Login = async (req, res) => {
     } catch (error) {
         console.error(`Error during login: ${error.message}`);
         res.status(500).json({ message: 'Server Error' });
+    }
+}
+
+
+// Delete User Data Using email
+export const DeleteUser = async (req, res) => {
+    const {email} = req.body;
+
+    try {
+        const user = await FindUserByEmail(email);
+        if(!user){
+            return res.status(404).json({ message: 'User not found' });
+        }
+        await DeleteUserByEmail(user.email);
+        res.status(200).json({ message: 'User deleted successfully' ,
+            username: user.username,
+            email: user.email
+        });
+
+    } catch (error) {
+        console.error(`Error deleting user: ${error.message}`);
+        res.status(500).json({ message: "Server Error" });
     }
 }
