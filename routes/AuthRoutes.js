@@ -10,9 +10,14 @@ const router = express.Router();
 // Register new device with a randomly generated API key
 router.post('/register', async (req, res) => {
     try {
-        const { device_id } = req.body;
-        const api_key = crypto.randomBytes(32).toString('hex'); // Secure random API key
+        let { device_id } = req.body;
+        const api_key = crypto.randomBytes(32).toString('hex');
         const hashedKey = await bcrypt.hash(api_key, 10);
+
+        // Generate a random device ID if not provided
+        if (!device_id) {
+            device_id = `device_${Date.now()}`; // Example: device_1710438821
+        }
 
         const result = await pool.query(
             'INSERT INTO devices (device_id, api_key) VALUES ($1, $2) RETURNING device_id',
@@ -40,7 +45,7 @@ router.post('/login', async (req, res) => {
             return res.status(403).json({ error: "Invalid API key" });
         }
 
-        const token = jwt.sign({ device_id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ device_id }, process.env.JWT_SECRET, { expiresIn: "71d" });
         res.json({ token });
     } catch (error) {
         res.status(500).json({ error: "Login failed" });

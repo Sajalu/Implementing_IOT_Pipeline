@@ -1,9 +1,9 @@
 const pool = require('../config/db');
 
-// Save data (Now requires authentication)
+// Save data 
 const saveSensorData = async (req, res) => {
     try {
-        const { door_status } = req.body;
+        const { door_status, temperature, humidity } = req.body;
         const device_id = req.device; // Get from JWT
 
         const result = await pool.query(
@@ -18,7 +18,7 @@ const saveSensorData = async (req, res) => {
     }
 };
 
-// Get latest sensor data (Now requires authentication)
+// Get latest sensor data 
 const getSensorData = async (req, res) => {
     try {
         const device_id = req.device; // Get from JWT
