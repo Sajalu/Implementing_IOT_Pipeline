@@ -247,4 +247,12 @@ Selected Sensors & Order List
 
 https://youtube.com/shorts/hPApitXGMm8?feature=share
 
+### **Sprint 18/03** ###
+
+https://hackmd.io/@abdulsalamzmahamed/Hk0Wl082yx
+
+### **Link to the website** ###
+
+https://lakesideresort.northeurope.cloudapp.azure.com/
+
 End 
