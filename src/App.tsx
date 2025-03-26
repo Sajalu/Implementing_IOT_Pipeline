@@ -9,7 +9,6 @@ import ActivitiesPage from './pages/ActivitiesPage';
 import LocationPage from './pages/LocationPage';
 import ContactPage from './pages/ContactPage';
 
-import Footer from './components/Footer';
 
 import AdminPage from './pages/AdminPage';
 import Footer from './components/Footer';
