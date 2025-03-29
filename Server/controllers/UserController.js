@@ -1,10 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
-import {getAllUsers,FindUserByEmail ,FindUserByUsername, createUser, DeleteUserByEmail} from "../models/UserModel.js";
+import {getAllUsers, FindUserByEmail, FindUserByUsername, createUser, DeleteUserByEmail} from "../models/UserModel.js";
 import dotenv from "dotenv";
 dotenv.config();
-
-
 
 export const Test = (req, res) => {
     res.status(200).json({message: 'WELCOME TO THE Rakkaranta-Holiday-Village SERVER.'});
@@ -20,7 +18,6 @@ export const GetUser = async (req, res) => {
     }
 }
 
-
 export const Signup = async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -34,7 +31,11 @@ export const Signup = async (req, res) => {
         const newUser = await createUser(username, email, hashedPassword);
 
         res.status(201).json({
-            user: newUser.username,
+            user: {
+                username: newUser.username,
+                email: newUser.email,
+                role: 'user'
+            },
             message: "User registered successfully.",
         });
     } catch (error) {
@@ -58,24 +59,33 @@ export const Login = async (req, res) => {
             return res.status(401).json({ error: 'Wrong Password.' });
         }
 
-        // Generate JWT token
+        // Generate JWT token with all the information needed for both services
         const token = jwt.sign(
-            {id: user.id, email: user.email},
+            {
+                id: user.id, 
+                email: user.email,
+                // Include these fields for compatibility with edge service
+                role: user.role || 'user'
+            },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        )
+            { expiresIn: '24h' }
+        );
 
         res.status(200).json({ 
             message: 'Login successful', 
-            User: user.username,
-            email: user.email,
-        })
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role || 'user'
+            }
+        });
     } catch (error) {
         console.error(`Error during login: ${error.message}`);
         res.status(500).json({ message: 'Server Error' });
     }
 }
-
 
 // Delete User Data Using email
 export const DeleteUser = async (req, res) => {
@@ -87,7 +97,8 @@ export const DeleteUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         await DeleteUserByEmail(user.email);
-        res.status(200).json({ message: 'User deleted successfully' ,
+        res.status(200).json({ 
+            message: 'User deleted successfully',
             username: user.username,
             email: user.email
         });
