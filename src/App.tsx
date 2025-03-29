@@ -1,5 +1,7 @@
+// Fixed App.tsx
+// File path: ./client/src/App.tsx
+
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginModal from './components/LoginModal';
 import Navbar from './components/Navbar';
@@ -8,30 +10,19 @@ import CottagesPage from './pages/CottagesPage';
 import ActivitiesPage from './pages/ActivitiesPage';
 import LocationPage from './pages/LocationPage';
 import ContactPage from './pages/ContactPage';
-
-
 import AdminPage from './pages/AdminPage';
 import Footer from './components/Footer';
+import { isAuthenticated, isAdmin } from './utils/auth';
 
-// Protected Route component that checks if user is authenticated
+// Protected Route component that checks if user is authenticated and has admin role
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // Check if user is logged in and has the admin role
-  const userString = localStorage.getItem('user');
-  const token = localStorage.getItem('token');
-  
-  if (!userString || !token) {
+  if (!isAuthenticated()) {
     // Not logged in, redirect to home
     return <Navigate to="/" replace />;
   }
   
-  try {
-    const user = JSON.parse(userString);
-    if (user.role !== 'admin') {
-      // Not an admin, redirect to home
-      return <Navigate to="/" replace />;
-    }
-  } catch (e) {
-    // Invalid user data
+  if (!isAdmin()) {
+    // Not an admin, redirect to home
     return <Navigate to="/" replace />;
   }
   
@@ -56,24 +47,6 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen">
-        <Navbar isScrolled={isScrolled} onLoginClick={() => setIsLoginOpen(true)} />
-
-        {/* Main Content */}
-        <div className="min-h-screen">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/cottages" element={<div className="pt-16"><CottagesPage /></div>} />
-            <Route path="/activities" element={<div className="pt-16"><ActivitiesPage /></div>} />
-            <Route path="/location" element={<div className="pt-16"><LocationPage /></div>} />
-            <Route path="/contact" element={<div className="pt-16"><ContactPage /></div>} />
-          </Routes>
-        </div>
-
-        {/* Login Modal */}
-        <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
-          {/* Footer Component */}
-        <Footer />
-
         <Routes>
           {/* Admin route wrapped in ProtectedRoute */}
           <Route 

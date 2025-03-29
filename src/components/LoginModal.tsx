@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, UserCircle2, Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { authApi } from '../services/api';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -14,13 +15,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     email: '',
     password: ''
   });
-
-  if (!isOpen) return null;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle login/signup logic here
-    console.log(isSignup ? 'Signup attempt:' : 'Login attempt:', formData);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -34,81 +28,49 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
     try {
       if (isSignup) {
-        // Handle signup
-        const response = await fetch('/api/v1/signup', {
-          method: 'POST',
-          mode: 'cors',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Origin': 'http://localhost:5173'
-          },
-          body: JSON.stringify({
-            username: formData.name,
-            email: formData.email,
-            password: formData.password
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Signup successful:', data);
-          // Switch to login view after successful signup
-          setIsSignup(false);
-          setFormData({...formData, name: ''});
-        } else {
-          const errorData = await response.json();
-          setError(errorData.message || 'Signup failed');
-          console.error('Signup failed:', errorData);
-        }
+        // Handle signup using the API service
+        const result = await authApi.register(
+          formData.name,
+          formData.email,
+          formData.password
+        );
+        
+        console.log('Signup successful:', result);
+        // Switch to login view after successful signup
+        setIsSignup(false);
+        setFormData({...formData, name: ''});
+        
       } else {
-        // Handle login
-        const response = await fetch('/api/v1/login', {
-          method: 'POST',
-          mode: 'cors',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Origin': 'http://localhost:5173'
-          },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Login successful:', data);
-          
-          // Store user info in localStorage including role
-          localStorage.setItem('user', JSON.stringify({
-            email: formData.email,
-            username: data.user.username,
-            role: data.user.role
-          }));
-          
-          // Store the JWT token separately for API calls
-          localStorage.setItem('token', data.token);
-          
-          // Close the modal
-          onClose();
-          
-          // For the admin user redirect to the admin dashboard
-          if (data.user.role === 'admin') {
-            navigate('/admin');
-          }
-        } else {
-          const errorData = await response.json();
-          setError(errorData.error || 'Login failed');
-          console.error('Login failed:', errorData);
+        // Handle login using the API service
+        const result = await authApi.login(
+          formData.email, 
+          formData.password
+        );
+        
+        console.log('Login successful:', result);
+        
+        // Store user info in localStorage
+        localStorage.setItem('user', JSON.stringify({
+          id: result.user.id,
+          username: result.user.username,
+          email: result.user.email,
+          role: result.user.role
+        }));
+        
+        // Store the JWT token separately for API calls
+        localStorage.setItem('token', result.token);
+        
+        // Close the modal
+        onClose();
+        
+        // For admin users, redirect to the admin dashboard
+        if (result.user.role === 'admin') {
+          navigate('/admin');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Authentication error:', error);
-      setError('Connection error. Please try again.');
+      setError(error.message || 'Authentication failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -130,10 +92,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         >
           <X className="h-6 w-6" />
         </button>
-
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          {isSignup ? 'Create Account' : 'Welcome Back'}
-        </h2>
 
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           {isSignup ? 'Create Account' : 'Welcome Back'}
@@ -190,17 +148,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           <button
             type="submit"
             className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            {isSignup ? 'Sign Up' : 'Login'}
-          </button>
-
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             disabled={loading}
           >
             {loading ? 'Processing...' : (isSignup ? 'Sign Up' : 'Login')}
           </button>
+          
           <div className="text-center mt-4">
             <button
               type="button"
@@ -215,5 +167,5 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     </div>
   );
 };
-};
+
 export default LoginModal;

@@ -10,11 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lucide-react": "^0.483.0",  // Keep the remote version (or the higher version)
+    "lucide-react": "^0.483.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.22.3",
-    "recharts": "^2.15.1"  // Add the new dependency from the remote version
+    "recharts": "^2.15.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
