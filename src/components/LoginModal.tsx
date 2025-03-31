@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import { X, UserCircle2, Mail, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, UserCircle2, Mail, Lock, Check, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../services/api';
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface PasswordRequirement {
+  regex: RegExp;
+  message: string;
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
@@ -18,12 +23,70 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  
+  // Password strength related states
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    minLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+    hasSpecial: false
+  });
+  
+  // Password requirement definitions
+  const requirements: Record<string, PasswordRequirement> = {
+    minLength: { regex: /.{8,}/, message: 'At least 8 characters' },
+    hasUppercase: { regex: /[A-Z]/, message: 'At least one uppercase letter' },
+    hasLowercase: { regex: /[a-z]/, message: 'At least one lowercase letter' },
+    hasNumber: { regex: /[0-9]/, message: 'At least one number' },
+    hasSpecial: { regex: /[^A-Za-z0-9]/, message: 'At least one special character' }
+  };
+  
+  // Evaluate password strength when password changes
+  useEffect(() => {
+    if (!formData.password) {
+      setPasswordStrength(0);
+      setPasswordRequirements({
+        minLength: false,
+        hasUppercase: false,
+        hasLowercase: false,
+        hasNumber: false,
+        hasSpecial: false
+      });
+      return;
+    }
+    
+    // Check each requirement
+    const updatedRequirements = {
+      minLength: requirements.minLength.regex.test(formData.password),
+      hasUppercase: requirements.hasUppercase.regex.test(formData.password),
+      hasLowercase: requirements.hasLowercase.regex.test(formData.password),
+      hasNumber: requirements.hasNumber.regex.test(formData.password),
+      hasSpecial: requirements.hasSpecial.regex.test(formData.password)
+    };
+    
+    setPasswordRequirements(updatedRequirements);
+    
+    // Calculate strength as a percentage (0-100)
+    const metRequirementsCount = Object.values(updatedRequirements).filter(Boolean).length;
+    const totalRequirements = Object.keys(updatedRequirements).length;
+    const strengthPercentage = (metRequirementsCount / totalRequirements) * 100;
+    setPasswordStrength(strengthPercentage);
+  }, [formData.password]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validate password strength on signup
+    if (isSignup && passwordStrength < 60) {
+      setError('Please create a stronger password');
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -81,6 +144,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+  
+  // Determine the color of the strength bar
+  const getStrengthColor = () => {
+    if (passwordStrength < 40) return 'bg-red-500';
+    if (passwordStrength < 70) return 'bg-yellow-500';
+    return 'bg-green-500';
   };
 
   return (
@@ -144,11 +214,46 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               required
             />
           </div>
+          
+          {/* Password Strength Indicator - Only show in signup mode */}
+          {isSignup && formData.password && (
+            <div className="space-y-2">
+              {/* Animated strength bar */}
+              <div className="h-2 w-full bg-gray-200 rounded overflow-hidden">
+                <div 
+                  className={`h-full ${getStrengthColor()} transition-all duration-300 ease-out`} 
+                  style={{ width: `${passwordStrength}%` }}
+                ></div>
+              </div>
+              
+              {/* Password requirements list */}
+              <div className="text-sm space-y-1">
+                <h3 className="font-medium text-gray-700">Password must contain:</h3>
+                <ul className="space-y-1">
+                  {Object.entries(requirements).map(([key, { message }]) => (
+                    <li key={key} className="flex items-center">
+                      {passwordRequirements[key as keyof typeof passwordRequirements] ? (
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4 text-gray-400 mr-2" />
+                      )}
+                      <span className={passwordRequirements[key as keyof typeof passwordRequirements] 
+                        ? "text-green-600" 
+                        : "text-gray-600"
+                      }>
+                        {message}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"
             className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            disabled={loading}
+            disabled={loading || (isSignup && passwordStrength < 60)}
           >
             {loading ? 'Processing...' : (isSignup ? 'Sign Up' : 'Login')}
           </button>
@@ -156,7 +261,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           <div className="text-center mt-4">
             <button
               type="button"
-              onClick={() => setIsSignup(!isSignup)}
+              onClick={() => {
+                setIsSignup(!isSignup);
+                setError('');
+              }}
               className="text-blue-600 hover:text-blue-800 text-sm"
             >
               {isSignup ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
