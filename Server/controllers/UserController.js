@@ -18,6 +18,36 @@ export const GetUser = async (req, res) => {
     }
 }
 
+// Password validation helper function (new)
+function validatePasswordStrength(password) {
+    // Define the requirements
+    const minLength = 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+    
+    if (password.length < minLength) {
+        return { 
+            isValid: false, 
+            message: "Password must be at least 8 characters long" 
+        };
+    }
+    
+    // Count how many requirements are met
+    const requirementsMet = [hasUppercase, hasLowercase, hasNumber, hasSpecial].filter(Boolean).length;
+    
+    // Require at least 3 out of 4 requirements
+    if (requirementsMet < 3) {
+        return {
+            isValid: false,
+            message: "Password must meet at least 3 of the following: uppercase letter, lowercase letter, number, special character"
+        };
+    }
+    
+    return { isValid: true };
+}
+
 export const Signup = async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -26,8 +56,14 @@ export const Signup = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: "Email Already Exists." });
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Add password validation (new)
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.isValid) {
+            return res.status(400).json({ message: passwordValidation.message });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await createUser(username, email, hashedPassword);
 
         res.status(201).json({
