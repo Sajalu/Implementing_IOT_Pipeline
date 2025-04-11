@@ -238,83 +238,55 @@ const AdminDashboard: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true);
     setError('');
-    
+
     try {
-      const data = await sensorApi.getData();
-      console.log('Fetched sensor data:', data);
-      
-      if (data && data.length > 0) {
-        // Transform the API data to match the UI format
-        const roomData: RoomData[] = data.map((item: SensorData) => {
-          const deviceId = String(item.device_id || item.id);
-          const timestamp = new Date(item.timestamp);
-          
-          return {
-            id: deviceId,
-            // Use the room name mapping, or fallback to device ID
-            name: roomNameMapping[deviceId] || `Room ${deviceId}`,
-            temperature: item.temperature || 22.0,
-            humidity: item.humidity || 45,
-            doorStatus: item.door_status ? "open" : "closed",
-            // Use demo booking status or default to false
-            isBooked: demoBookingStatus[deviceId] || false,
-            lastUpdated: timestamp.toLocaleString()
-          };
-        });
-        
-        setRooms(roomData);
-        
-        // If there's history data available for the first device, use it for the charts
-        if (data[0].history && data[0].history.length > 0) {
-          // Process temperature history for charts
-          const tempHistory: TimeSeriesData[] = data[0].history.map((reading: any) => ({
-            time: new Date(reading.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            value: reading.temperature
-          }));
-          
-          // Process humidity history for charts
-          const humidHistory: TimeSeriesData[] = data[0].history.map((reading: any) => ({
-            time: new Date(reading.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            value: reading.humidity
-          }));
-          
-          setTemperatureData(tempHistory);
-          setHumidityData(humidHistory);
-        } else {
-          // Get temperature history for the first device
-          try {
-            const deviceId = String(data[0].device_id || data[0].id); 
-            const history = await sensorApi.getHistory(deviceId, 1); // Get 1 day of history
-            
-            if (history && history.length > 0) {
-              // Transform history data for charts
-              const tempReadings = history.map(reading => ({
-                time: new Date(reading.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                value: reading.temperature
-              }));
-              
-              const humidReadings = history.map(reading => ({
-                time: new Date(reading.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                value: reading.humidity
-              }));
-              
-              setTemperatureData(tempReadings);
-              setHumidityData(humidReadings);
-            }
-          } catch (historyError) {
-            console.error('Error fetching history:', historyError);
-            // Fall back to empty data, which the charts will handle
-          }
-        }
-        
-        setLastUpdated(new Date());
-      } else {
-        throw new Error('No sensor data received');
+      const response = await sensorApi.getData();
+
+      if (!response || response.length === 0) {
+        throw new Error('No data received from the API');
       }
+
+      console.log('Fetched sensor data:', response);
+
+      // Process the response as usual
+      const roomData: RoomData[] = response.map((item: SensorData) => {
+        const deviceId = String(item.device_id || item.id);
+        const timestamp = new Date(item.timestamp);
+
+        return {
+          id: deviceId,
+          name: roomNameMapping[deviceId] || `Room ${deviceId}`,
+          temperature: item.temperature || 22.0,
+          humidity: item.humidity || 45,
+          doorStatus: item.door_status ? "open" : "closed",
+          isBooked: demoBookingStatus[deviceId] || false,
+          lastUpdated: timestamp.toLocaleString(),
+        };
+      });
+
+      setRooms(roomData);
+
+      // Handle history data for charts
+      if (response[0]?.history?.length > 0) {
+        const tempHistory: TimeSeriesData[] = response[0].history.map((reading: any) => ({
+          time: new Date(reading.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          value: reading.temperature,
+        }));
+
+        const humidHistory: TimeSeriesData[] = response[0].history.map((reading: any) => ({
+          time: new Date(reading.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          value: reading.humidity,
+        }));
+
+        setTemperatureData(tempHistory);
+        setHumidityData(humidHistory);
+      }
+
+      setLastUpdated(new Date());
     } catch (err: any) {
       console.error('Error fetching sensor data:', err);
       setError(`Error loading data: ${err.message}. Using demo data instead.`);
-      // Keep using mock data on error
+      setRooms(mockRooms); // Fallback to mock data
     } finally {
       setIsLoading(false);
     }
