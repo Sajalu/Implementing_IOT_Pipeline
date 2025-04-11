@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Mouse as House, Waves, MapPin, Phone, UserCircle2 } from 'lucide-react';
+import { Menu, X, Home, Mouse as House, Waves, MapPin, Phone, UserCircle2, Bed } from 'lucide-react';
 
 interface NavbarProps {
   isScrolled: boolean;
@@ -23,7 +23,7 @@ const Navbar: React.FC<NavbarProps> = ({ isScrolled, onLoginClick }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            {/* Updated logo with the provided image */}
+            {/* Logo */}
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img
                 src="https://static.vecteezy.com/system/resources/previews/009/428/828/non_2x/snow-cabin-in-winter-cartoon-icon-illustration-building-holidays-icon-concept-isolated-premium-flat-cartoon-style-vector.jpg"
@@ -41,6 +41,13 @@ const Navbar: React.FC<NavbarProps> = ({ isScrolled, onLoginClick }) => {
             <NavLink to="/activities" icon={<Waves className="h-4 w-4" />} text="Activities" />
             <NavLink to="/location" icon={<MapPin className="h-4 w-4" />} text="Location" />
             <NavLink to="/contact" icon={<Phone className="h-4 w-4" />} text="Contact" />
+            <Link
+              to="/book"
+              className="flex items-center space-x-1 px-4 py-2 rounded-md text-white hover:bg-white/20 transition-colors ml-2"
+            >
+              <Bed className="h-4 w-4" />
+              <span>Book</span>
+            </Link>
             <button
               onClick={onLoginClick}
               className="flex items-center space-x-1 px-4 py-2 rounded-md text-white hover:bg-white/20 transition-colors ml-2"
@@ -71,6 +78,7 @@ const Navbar: React.FC<NavbarProps> = ({ isScrolled, onLoginClick }) => {
             <MobileNavLink to="/activities" icon={<Waves className="h-4 w-4" />} text="Activities" setIsMenuOpen={setIsMenuOpen} />
             <MobileNavLink to="/location" icon={<MapPin className="h-4 w-4" />} text="Location" setIsMenuOpen={setIsMenuOpen} />
             <MobileNavLink to="/contact" icon={<Phone className="h-4 w-4" />} text="Contact" setIsMenuOpen={setIsMenuOpen} />
+            <MobileNavLink to="/book" icon={<Bed className="h-4 w-4" />} text="Book" setIsMenuOpen={setIsMenuOpen} />
             <button
               onClick={() => {
                 onLoginClick();

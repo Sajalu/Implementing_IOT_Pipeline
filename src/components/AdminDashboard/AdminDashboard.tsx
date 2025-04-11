@@ -268,7 +268,7 @@ const AdminDashboard: React.FC = () => {
 
       // Handle history data for charts
       if (response[0]?.history?.length > 0) {
-        const tempHistory: TimeSeriesData[] = response[0].history.map((reading: any) => ({
+        const tempHistory: TimeSeriesData[] = response[0].history?.map((reading: any) => ({
           time: new Date(reading.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           value: reading.temperature,
         }));

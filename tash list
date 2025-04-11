@@ -1,0 +1,35 @@
+[33mcommit f3e6dc71f1a21949bc32a22bfc77b7cc9305f098[m[33m ([m[1;36mHEAD -> [m[1;32mFrontend[m[33m)[m
+Author: Krishna shrestha <krishna.shrestha@student.lab.fi>
+Date:   Fri Apr 11 23:17:43 2025 +0300
+
+    Recover booking system progress
+
+[33mcommit d4525cfbb781de23c4152e96bf1f4d0c692ddaad[m[33m ([m[1;31morigin/Frontend[m[33m)[m
+Author: abdulsalam <abdulsalam.mahamed@student.lab.fi>
+Date:   Mon Mar 31 15:12:01 2025 +0300
+
+    Made animation and visual checklist for password validatio, disable singup button if the validation failed
+
+[33mcommit 3982e6c7897d3fb527ec5950306f7f20a176863b[m
+Author: abdulsalam <abdulsalam.mahamed@student.lab.fi>
+Date:   Sat Mar 29 17:08:48 2025 +0200
+
+    Updated package.json, App.tsx, AdminDashboard, LoginModal, and API service, now the dashboard retrieve the data of backend edge sensors
+
+[33mcommit 746a24660bdc79d80e83b94729b522f202293421[m
+Author: abdulsalam <abdulsalam.mahamed@student.lab.fi>
+Date:   Wed Mar 26 14:24:39 2025 +0200
+
+    errors fixed in vite.config.ts and App.tsx
+
+[33mcommit d5dfabd58e071d2e3ac68922b0b388092e48fec6[m
+Author: abdulsalam <abdulsalam.mahamed@student.lab.fi>
+Date:   Wed Mar 26 14:02:17 2025 +0200
+
+    Resolved merge conflicts
+
+[33mcommit 1264603c9c99c67a78b7aca04a0c098a2044ec61[m
+Author: Rabin thapa <itsmerobin.dc07@gmail.com>
+Date:   Wed Mar 12 14:11:37 2025 +0200
+
+    Initial commit - Added frontend project files

@@ -1,5 +1,7 @@
-import React from 'react';
-import { Star, Users, Wifi, Tv, Coffee } from 'lucide-react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Star, Users, Wifi, Tv, Coffee } from "lucide-react";
+import BookForm from "./BookForm"; // Import the BookForm component
 
 interface Cottage {
   id: number;
@@ -10,9 +12,10 @@ interface Cottage {
   rating: number;
   image: string;
   amenities: string[];
+  reserved: boolean;
 }
 
-const cottages: Cottage[] = [
+const initialCottages: Cottage[] = [
   {
     id: 1,
     name: "The Pilot's Son 1",
@@ -21,7 +24,8 @@ const cottages: Cottage[] = [
     capacity: "6 guests",
     rating: 4.9,
     image: "https://rakkaranta.fi/cdn/shop/files/DSC00541.jpg?v=1729705883&width=493",
-    amenities: ["Private sauna", "Lake view", "Fully equipped kitchen", "Wi-Fi", "TV"]
+    amenities: ["Private sauna", "Lake view", "Fully equipped kitchen", "Wi-Fi", "TV"],
+    reserved: false,
   },
   {
     id: 2,
@@ -31,7 +35,8 @@ const cottages: Cottage[] = [
     capacity: "4 guests",
     rating: 4.7,
     image: "https://rakkaranta.fi/cdn/shop/files/B_mokki_kansikuva.jpg?v=1737018020&width=493",
-    amenities: ["Fireplace", "Forest view", "BBQ area", "Wi-Fi", "TV"]
+    amenities: ["Fireplace", "Forest view", "BBQ area", "Wi-Fi", "TV"],
+    reserved: false,
   },
   {
     id: 3,
@@ -41,7 +46,8 @@ const cottages: Cottage[] = [
     capacity: "8 guests",
     rating: 4.8,
     image: "https://rakkaranta.fi/cdn/shop/files/C_mokki_kansikuva.jpg?v=1737015692&width=493",
-    amenities: ["Hot tub", "Terrace", "Game room", "Wi-Fi", "Smart TV"]
+    amenities: ["Hot tub", "Terrace", "Game room", "Wi-Fi", "Smart TV"],
+    reserved: false,
   },
   {
     id: 4,
@@ -51,7 +57,8 @@ const cottages: Cottage[] = [
     capacity: "2 guests",
     rating: 4.6,
     image: "https://rakkaranta.fi/cdn/shop/files/D_mokki_kansikuva.jpg?v=1737018371&width=493",
-    amenities: ["Private deck", "Kitchenette", "Breakfast included", "Wi-Fi", "TV"]
+    amenities: ["Private deck", "Kitchenette", "Breakfast included", "Wi-Fi", "TV"],
+    reserved: false,
   },
   {
     id: 5,
@@ -61,17 +68,28 @@ const cottages: Cottage[] = [
     capacity: "10 guests",
     rating: 4.9,
     image: "https://rakkaranta.fi/cdn/shop/files/Yhteiset_tilat_kansikuva.jpg?v=1737018417&width=535",
-    amenities: ["Private beach", "Boat dock", "Full kitchen", "Wi-Fi", "Entertainment system"]
-  }
+    amenities: ["Private beach", "Boat dock", "Full kitchen", "Wi-Fi", "Entertainment system"],
+    reserved: false,
+  },
 ];
 
 const CottagesPage: React.FC = () => {
+  const [cottages, setCottages] = useState(initialCottages);
+  const navigate = useNavigate(); // Initialize navigate hook
+
+  const handleBookNow = (cottageName: string) => {
+    navigate(`/book?cottage=${encodeURIComponent(cottageName)}`);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Our Cottages</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {cottages.map((cottage) => (
-          <div key={cottage.id} className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform hover:scale-105">
+          <div
+            key={cottage.id}
+            className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform hover:scale-105"
+          >
             <img
               src={cottage.image}
               alt={cottage.name}
@@ -96,16 +114,19 @@ const CottagesPage: React.FC = () => {
                     key={index}
                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                   >
-                    {amenity === 'Wi-Fi' && <Wifi className="h-3 w-3 mr-1" />}
-                    {amenity === 'TV' && <Tv className="h-3 w-3 mr-1" />}
-                    {amenity === 'Breakfast included' && <Coffee className="h-3 w-3 mr-1" />}
+                    {amenity === "Wi-Fi" && <Wifi className="h-3 w-3 mr-1" />}
+                    {amenity === "TV" && <Tv className="h-3 w-3 mr-1" />}
+                    {amenity === "Breakfast included" && <Coffee className="h-3 w-3 mr-1" />}
                     {amenity}
                   </span>
                 ))}
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-lg font-bold text-blue-600">{cottage.price}</span>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                <button
+                  onClick={() => handleBookNow(cottage.name)} // Pass the cottage name
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
                   Book Now
                 </button>
               </div>

@@ -12,6 +12,7 @@ import LocationPage from './pages/LocationPage';
 import ContactPage from './pages/ContactPage';
 import AdminPage from './pages/AdminPage';
 import Footer from './components/Footer';
+import BookForm from './pages/BookForm'; // Import the BookForm component
 import { isAuthenticated, isAdmin } from './utils/auth';
 
 // Protected Route component that checks if user is authenticated and has admin role
@@ -58,6 +59,9 @@ function App() {
             } 
           />
           
+          {/* BookForm route */}
+          <Route path="/book" element={<BookForm />} />
+
           {/* All other routes include the regular layout */}
           <Route
             path="/*"
