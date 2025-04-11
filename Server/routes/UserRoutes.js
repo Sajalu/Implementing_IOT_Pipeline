@@ -1,5 +1,6 @@
 import express from 'express';
 import { Test, Signup, GetUser, Login, DeleteUser } from '../controllers/UserController.js';
+import { bookReservation, cancelBooking } from '../controllers/reservationController.js';
 
 const router = express.Router();
 
@@ -9,5 +10,7 @@ router.get('/users', GetUser);
 router.post('/signup', Signup);
 router.post('/login', Login);
 router.delete('/removeuser', DeleteUser); 
+
+
 
 export default router;

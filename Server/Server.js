@@ -8,6 +8,7 @@ import pool from './config/db.js';
 import rateLimit from 'express-rate-limit';
 import 'dotenv/config';
 import router from './routes/UserRoutes.js';
+import reservationRouter from './routes/reservationRoutes.js'
 
 // server configuration
 const server = express();
@@ -46,6 +47,9 @@ server.use(limiter);
 
 // Api Routes
 server.use('/api/v1', router);
+// ------
+server.use('/api/v1/reservations', reservationRouter);
+
 
 // Database Connection
 const connectDB = async () => {
