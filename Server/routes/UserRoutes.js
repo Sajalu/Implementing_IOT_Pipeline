@@ -1,7 +1,9 @@
 import express from 'express';
 import { Test, Signup, GetUser, Login, DeleteUser } from '../controllers/UserController.js';
 
+
 const router = express.Router();
+
 
 router.get('/', Test);
 router.get('/users', GetUser);
