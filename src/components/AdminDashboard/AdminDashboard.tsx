@@ -16,9 +16,13 @@ import {
   Droplet,
   Calendar,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  CalendarClock, 
+  BookOpen 
 } from "lucide-react";
 import { sensorApi, SensorData } from "../../services/api";
+import ReservationManagement from "./ReservationManagement"; // Import the reservation management component
+
 
 // Define types for our UI data structures
 interface RoomData {
@@ -234,6 +238,7 @@ const AdminDashboard: React.FC = () => {
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
+
   // Fetch data from the API
   const fetchData = async () => {
     setIsLoading(true);
@@ -367,9 +372,17 @@ const AdminDashboard: React.FC = () => {
           />
           <SidebarItem
             icon={<Calendar />}
-            text="Bookings"
-            isActive={activeTab === "bookings"}
-            onClick={() => setActiveTab("bookings")}
+            text="Cottage Status"
+            isActive={activeTab === "cottages"}
+            onClick={() => setActiveTab("cottages")}
+            isSidebarOpen={isSidebarOpen}
+          />
+          {/* New Reservations Management Tab */}
+          <SidebarItem
+            icon={<CalendarClock />}
+            text="Reservations"
+            isActive={activeTab === "reservations"}
+            onClick={() => setActiveTab("reservations")}
             isSidebarOpen={isSidebarOpen}
           />
           <SidebarItem
@@ -401,7 +414,11 @@ const AdminDashboard: React.FC = () => {
                 {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
               <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
-                {activeTab === "dashboard" ? "IoT Dashboard" : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+                {activeTab === "dashboard" 
+                  ? "IoT Dashboard" 
+                  : activeTab === "reservations"
+                  ? "Reservation Management"
+                  : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -444,10 +461,15 @@ const AdminDashboard: React.FC = () => {
             </div>
           )}
           
-          {lastUpdated && (
+          {lastUpdated && activeTab !== "reservations" && (
             <div className="text-sm text-gray-500 mb-4">
               Last updated: {lastUpdated.toLocaleString()}
             </div>
+          )}
+
+          {/* Reservation Management Tab */}
+          {activeTab === "reservations" && (
+            <ReservationManagement />
           )}
 
           {activeTab === "dashboard" && (
@@ -628,9 +650,9 @@ const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {activeTab === "bookings" && (
+          {activeTab === "cottages" && (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Room Bookings</h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Cottage Status</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {rooms.map((room) => (
                   <div
@@ -657,7 +679,7 @@ const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {activeTab === "settings" && (
+{activeTab === "settings" && (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Settings</h2>
               <p className="text-gray-600 dark:text-gray-400">Configure your IoT monitoring settings here.</p>
