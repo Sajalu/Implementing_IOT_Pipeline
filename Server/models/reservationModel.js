@@ -1,4 +1,21 @@
-import pool from "../config/db.js";
+import pool from '../config/db.js';
+
+// Check if a cottage is available for the given dates
+export const checkAvailability = async (cottageId, checkIn, checkOut) => {
+  const query = `
+    SELECT COUNT(*) as booking_count 
+    FROM reservations 
+    WHERE cottage_id = $1 
+    AND status = 'confirmed'
+    AND (
+      (check_in <= $2 AND check_out > $2) OR
+      (check_in < $3 AND check_out >= $3) OR
+      (check_in >= $2 AND check_out <= $3)
+    )`;
+  
+  const result = await pool.query(query, [cottageId, checkIn, checkOut]);
+  return parseInt(result.rows[0].booking_count) === 0;
+};
 
 export const createReservation = async (data) => {
     const { full_name, email, phone, check_in, check_out, guests, special_requests } = data;
