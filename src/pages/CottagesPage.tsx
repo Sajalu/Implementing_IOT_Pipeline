@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+// File path: ./client/src/pages/CottagesPage.tsx
+
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, Users, Wifi, Tv, Coffee } from "lucide-react";
-import BookForm from "./BookForm"; // Import the BookForm component
+import { Star, Users, Wifi, Tv, Coffee, XCircle } from "lucide-react";
 
 interface Cottage {
   id: number;
@@ -12,7 +13,7 @@ interface Cottage {
   rating: number;
   image: string;
   amenities: string[];
-  reserved: boolean;
+  isAvailable?: boolean; // Add availability property
 }
 
 const initialCottages: Cottage[] = [
@@ -25,7 +26,6 @@ const initialCottages: Cottage[] = [
     rating: 4.9,
     image: "https://rakkaranta.fi/cdn/shop/files/DSC00541.jpg?v=1729705883&width=493",
     amenities: ["Private sauna", "Lake view", "Fully equipped kitchen", "Wi-Fi", "TV"],
-    reserved: false,
   },
   {
     id: 2,
@@ -36,7 +36,6 @@ const initialCottages: Cottage[] = [
     rating: 4.7,
     image: "https://rakkaranta.fi/cdn/shop/files/B_mokki_kansikuva.jpg?v=1737018020&width=493",
     amenities: ["Fireplace", "Forest view", "BBQ area", "Wi-Fi", "TV"],
-    reserved: false,
   },
   {
     id: 3,
@@ -47,7 +46,6 @@ const initialCottages: Cottage[] = [
     rating: 4.8,
     image: "https://rakkaranta.fi/cdn/shop/files/C_mokki_kansikuva.jpg?v=1737015692&width=493",
     amenities: ["Hot tub", "Terrace", "Game room", "Wi-Fi", "Smart TV"],
-    reserved: false,
   },
   {
     id: 4,
@@ -58,7 +56,6 @@ const initialCottages: Cottage[] = [
     rating: 4.6,
     image: "https://rakkaranta.fi/cdn/shop/files/D_mokki_kansikuva.jpg?v=1737018371&width=493",
     amenities: ["Private deck", "Kitchenette", "Breakfast included", "Wi-Fi", "TV"],
-    reserved: false,
   },
   {
     id: 5,
@@ -69,13 +66,59 @@ const initialCottages: Cottage[] = [
     rating: 4.9,
     image: "https://rakkaranta.fi/cdn/shop/files/Yhteiset_tilat_kansikuva.jpg?v=1737018417&width=535",
     amenities: ["Private beach", "Boat dock", "Full kitchen", "Wi-Fi", "Entertainment system"],
-    reserved: false,
   },
 ];
 
 const CottagesPage: React.FC = () => {
   const [cottages, setCottages] = useState(initialCottages);
-  const navigate = useNavigate(); // Initialize navigate hook
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  // Fetch cottage availability when component mounts
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      setIsLoading(true);
+      try {
+        // Get date range for next 7 days as default
+        const today = new Date();
+        const nextWeek = new Date(today);
+        nextWeek.setDate(today.getDate() + 7);
+        
+        const checkIn = today.toISOString().split('T')[0];
+        const checkOut = nextWeek.toISOString().split('T')[0];
+        
+        // Fetch availability from the API
+        const response = await fetch(`/api/v1/reservations/availability?check_in=${checkIn}&check_out=${checkOut}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch cottage availability');
+        }
+        
+        const availabilityData = await response.json();
+        
+        // Map the availability data to our cottages
+        setCottages(prev => prev.map(cottage => {
+          // Find matching cottage in availability data by name
+          const matchingCottage = availabilityData.find(
+            (c: any) => c.name.toLowerCase() === cottage.name.toLowerCase()
+          );
+          
+          return {
+            ...cottage,
+            isAvailable: matchingCottage ? matchingCottage.isAvailable : true
+          };
+        }));
+      } catch (err: any) {
+        console.error('Error fetching availability:', err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchAvailability();
+  }, []);
 
   const handleBookNow = (cottageName: string) => {
     navigate(`/book?cottage=${encodeURIComponent(cottageName)}`);
@@ -84,6 +127,20 @@ const CottagesPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Our Cottages</h1>
+      
+      {isLoading && (
+        <div className="text-center py-4">
+          <div className="inline-block animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+          <p className="mt-2 text-gray-600">Checking availability...</p>
+        </div>
+      )}
+      
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {cottages.map((cottage) => (
           <div
@@ -123,12 +180,25 @@ const CottagesPage: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-lg font-bold text-blue-600">{cottage.price}</span>
-                <button
-                  onClick={() => handleBookNow(cottage.name)} // Pass the cottage name
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Book Now
-                </button>
+                
+                {cottage.isAvailable === false ? (
+                  // Red "Unavailable" button for unavailable cottages
+                  <button
+                    disabled
+                    className="px-4 py-2 bg-red-600 text-white rounded-md flex items-center cursor-not-allowed"
+                  >
+                    <XCircle className="h-4 w-4 mr-1" />
+                    Unavailable
+                  </button>
+                ) : (
+                  // Normal "Book Now" button for available cottages
+                  <button
+                    onClick={() => handleBookNow(cottage.name)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    Book Now
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -138,4 +208,4 @@ const CottagesPage: React.FC = () => {
   );
 };
 
-export default CottagesPage;
+export default CottagesPage;  

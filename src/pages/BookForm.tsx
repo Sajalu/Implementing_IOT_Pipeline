@@ -13,11 +13,11 @@ interface Cottage {
 
 // Initial cottages data
 const initialCottages: Cottage[] = [
-  { id: "device_pilots_son_1", name: "The Pilot's Son 1" },
-  { id: "device_pilots_son_2", name: "The Pilot's Son 2" },
-  { id: "device_henry_ford", name: "Henry Ford Cabin" },
-  { id: "device_beach_house", name: "Beach House" },
-  { id: "device_grand_lake", name: "Grand Lake House" },
+  { id: "cottage_pilots_son_1", name: "The Pilot's Son 1" },
+  { id: "cottage_pilots_son_2", name: "The Pilot's Son 2" },
+  { id: "cottage_henry_ford", name: "Henry Ford Cabin" },
+  { id: "cottage_beach_house", name: "Beach House" },
+  { id: "cottage_grand_lake", name: "Grand Lake House" },
 ];
 
 // API service for bookings and availability
@@ -25,16 +25,9 @@ const bookingApi = {
   // Check availability for all cottages
   checkAvailability: async (checkIn: string, checkOut: string): Promise<Cottage[]> => {
     try {
-      // In a real app, uncomment to use API
-      // const response = await fetch(`/api/v1/reservations/availability?check_in=${checkIn}&check_out=${checkOut}`);
-      // if (!response.ok) throw new Error('Failed to fetch availability');
-      // return await response.json();
-      
-      // For demo purposes, return mock data with random availability
-      return initialCottages.map(cottage => ({
-        ...cottage,
-        isAvailable: Math.random() > 0.3 // 70% chance of being available
-      }));
+      const response = await fetch(`/api/v1/reservations/availability?check_in=${checkIn}&check_out=${checkOut}`);
+      if (!response.ok) throw new Error('Failed to fetch availability');
+      return await response.json();
     } catch (error) {
       console.error('Error checking availability:', error);
       throw error;
@@ -44,23 +37,15 @@ const bookingApi = {
   // Submit booking
   submitBooking: async (bookingData: any): Promise<any> => {
     try {
-      // In a real app, uncomment to use API
-      // const response = await fetch('/api/v1/reservations/book', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify(bookingData)
-      // });
-      // if (!response.ok) throw new Error('Failed to create booking');
-      // return await response.json();
-      
-      // For demo purposes, simulate API response
-      return {
-        success: true,
-        message: 'Booking confirmed successfully',
-        reservation: { ...bookingData, id: Math.floor(Math.random() * 1000) }
-      };
+      const response = await fetch('/api/v1/reservations/book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookingData)
+      });
+      if (!response.ok) throw new Error('Failed to create booking');
+      return await response.json();
     } catch (error) {
       console.error('Error submitting booking:', error);
       throw error;
@@ -72,7 +57,7 @@ const BookForm: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
-  const selectedCottage = queryParams.get("cottage");
+  const selectedCottageName = queryParams.get("cottage");
 
   // State hooks
   const [cottages, setCottages] = useState<Cottage[]>(initialCottages);
@@ -88,9 +73,34 @@ const BookForm: React.FC = () => {
     checkIn: "",
     checkOut: "",
     guests: "1",
-    cottage_id: selectedCottage || "",
+    cottage_id: "",
     specialRequests: "",
   });
+
+  // Find cottage ID based on name
+  useEffect(() => {
+    if (selectedCottageName) {
+      // Find the cottage ID that matches the name from the URL parameter
+      const foundCottage = cottages.find(
+        cottage => cottage.name.toLowerCase() === selectedCottageName.toLowerCase()
+      );
+      
+      if (foundCottage) {
+        setFormData(prev => ({
+          ...prev,
+          cottage_id: foundCottage.id
+        }));
+      }
+    }
+  }, [selectedCottageName, cottages]);
+
+  // Check availability automatically when dates are selected
+  useEffect(() => {
+    // Only check availability if both dates are provided
+    if (formData.checkIn && formData.checkOut) {
+      checkAvailability();
+    }
+  }, [formData.checkIn, formData.checkOut]);
 
   // Handle input changes
   const handleChange = (
@@ -99,9 +109,8 @@ const BookForm: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     
-    // Clear availability check when dates or cottage changes
-    if (name === 'checkIn' || name === 'checkOut' || name === 'cottage_id') {
-      setAvailabilityChecked(false);
+    // Clear availability check when cottage changes
+    if (name === 'cottage_id') {
       setError('');
       setSuccess('');
     }
@@ -111,14 +120,7 @@ const BookForm: React.FC = () => {
   const checkAvailability = async () => {
     // Validate dates
     if (!formData.checkIn || !formData.checkOut) {
-      setError('Please select check-in and check-out dates');
-      return;
-    }
-    
-    // Validate cottage selection
-    if (!formData.cottage_id) {
-      setError('Please select a cottage');
-      return;
+      return; // Don't show an error, just don't check
     }
     
     setIsCheckingAvailability(true);
@@ -134,11 +136,13 @@ const BookForm: React.FC = () => {
       setCottages(availableCottages);
       
       // Check if selected cottage is available
-      const selectedCottageData = availableCottages.find(c => c.id === formData.cottage_id);
-      if (selectedCottageData?.isAvailable) {
-        setSuccess('The selected cottage is available for your dates!');
-      } else {
-        setError('The selected cottage is not available for these dates. Please choose another cottage or dates.');
+      if (formData.cottage_id) {
+        const selectedCottageData = availableCottages.find(c => c.id === formData.cottage_id);
+        if (selectedCottageData?.isAvailable) {
+          setSuccess('The selected cottage is available for your dates!');
+        } else {
+          setError('The selected cottage is not available for these dates. Please choose another cottage or dates.');
+        }
       }
       
       setAvailabilityChecked(true);
@@ -157,6 +161,12 @@ const BookForm: React.FC = () => {
     if (!availabilityChecked) {
       await checkAvailability();
       // Don't proceed with booking until availability is confirmed
+      return;
+    }
+    
+    // Check if cottage is selected
+    if (!formData.cottage_id) {
+      setError('Please select a cottage');
       return;
     }
     
@@ -247,14 +257,15 @@ const BookForm: React.FC = () => {
             </option>
             {cottages.map((cottage) => (
               <option 
-                key={cottage.id} 
-                value={cottage.id}
-                disabled={availabilityChecked && cottage.isAvailable === false}
-              >
-                {cottage.name} {availabilityChecked && cottage.isAvailable !== undefined && (
-                  cottage.isAvailable ? " (Available)" : " (Not Available)"
-                )}
-              </option>
+              key={cottage.id} 
+              value={cottage.id}
+              disabled={availabilityChecked && cottage.isAvailable === false}
+              className={availabilityChecked && cottage.isAvailable === false ? "text-red-500" : ""}
+            >
+              {cottage.name} {availabilityChecked && cottage.isAvailable !== undefined && (
+                cottage.isAvailable ? " (Available)" : " (Not Available)"
+              )}
+            </option>
             ))}
           </select>
         </div>
@@ -302,137 +313,126 @@ const BookForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Check Availability Button */}
-        <div className="mb-6">
-          <button
-            type="button"
-            onClick={checkAvailability}
-            disabled={isCheckingAvailability || isSubmitting || !formData.checkIn || !formData.checkOut || !formData.cottage_id}
-            className="w-full bg-blue-100 text-blue-700 hover:bg-blue-200 py-2 px-4 rounded font-medium flex justify-center items-center"
-          >
-            {isCheckingAvailability ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Checking Availability...
-              </>
-            ) : (
-              'Check Availability'
-            )}
-          </button>
-        </div>
+        {/* Checking Availability Status */}
+        {isCheckingAvailability && (
+          <div className="mb-4 text-center py-2">
+            <div className="inline-block animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mr-2"></div>
+            <span className="text-gray-600">Checking availability...</span>
+          </div>
+        )}
 
-        {/* Contact Information - Only show if a cottage is available */}
-        {(!availabilityChecked || cottages.find(c => c.id === formData.cottage_id)?.isAvailable) && (
-          <>
-            <div className="border-t border-gray-200 pt-6 mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Your Information</h3>
-              
-              <div className="mb-4">
-                <label htmlFor="fullName" className="block text-gray-700 mb-1 font-medium">
-                  Full Name:
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  placeholder="Enter your full name"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  required
-                  className="w-full p-2 border rounded"
-                  disabled={isSubmitting}
-                />
-              </div>
+        {/* Contact Information */}
+        <div className="border-t border-gray-200 pt-6 mb-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Your Information</h3>
+          
+          <div className="mb-4">
+            <label htmlFor="fullName" className="block text-gray-700 mb-1 font-medium">
+              Full Name:
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              placeholder="Enter your full name"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border rounded"
+              disabled={isSubmitting}
+            />
+          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label htmlFor="email" className="block text-gray-700 mb-1 font-medium">
-                    Email Address:
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full p-2 border rounded"
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="block text-gray-700 mb-1 font-medium">
-                    Phone Number:
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    placeholder="Enter your phone number"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    className="w-full p-2 border rounded"
-                    disabled={isSubmitting}
-                  />
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="guests" className="block text-gray-700 mb-1 font-medium">
-                  Number of Guests:
-                </label>
-                <select
-                  id="guests"
-                  name="guests"
-                  value={formData.guests}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded"
-                  disabled={isSubmitting}
-                >
-                  <option value="1">1 Guest</option>
-                  <option value="2">2 Guests</option>
-                  <option value="3">3 Guests</option>
-                  <option value="4">4 Guests</option>
-                  <option value="5">5 Guests</option>
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="specialRequests" className="block text-gray-700 mb-1 font-medium">
-                  Special Requests:
-                </label>
-                <textarea
-                  id="specialRequests"
-                  name="specialRequests"
-                  placeholder="Any special requests?"
-                  value={formData.specialRequests}
-                  onChange={handleChange}
-                  rows={4}
-                  className="w-full p-2 border rounded"
-                  disabled={isSubmitting}
-                ></textarea>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label htmlFor="email" className="block text-gray-700 mb-1 font-medium">
+                Email Address:
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full p-2 border rounded"
+                disabled={isSubmitting}
+              />
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting || !availabilityChecked || !cottages.find(c => c.id === formData.cottage_id)?.isAvailable}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded font-semibold flex justify-center items-center"
+            <div>
+              <label htmlFor="phone" className="block text-gray-700 mb-1 font-medium">
+                Phone Number:
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                placeholder="Enter your phone number"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                className="w-full p-2 border rounded"
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="guests" className="block text-gray-700 mb-1 font-medium">
+              Number of Guests:
+            </label>
+            <select
+              id="guests"
+              name="guests"
+              value={formData.guests}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              disabled={isSubmitting}
             >
-              {isSubmitting ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                'Confirm Booking'
-              )}
-            </button>
-          </>
-        )}
+              <option value="1">1 Guest</option>
+              <option value="2">2 Guests</option>
+              <option value="3">3 Guests</option>
+              <option value="4">4 Guests</option>
+              <option value="5">5 Guests</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="specialRequests" className="block text-gray-700 mb-1 font-medium">
+              Special Requests:
+            </label>
+            <textarea
+              id="specialRequests"
+              name="specialRequests"
+              placeholder="Any special requests?"
+              value={formData.specialRequests}
+              onChange={handleChange}
+              rows={4}
+              className="w-full p-2 border rounded"
+              disabled={isSubmitting}
+            ></textarea>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting || (availabilityChecked && formData.cottage_id && !cottages.find(c => c.id === formData.cottage_id)?.isAvailable)}
+          className={`w-full py-3 px-4 rounded font-semibold flex justify-center items-center ${
+            availabilityChecked && formData.cottage_id && !cottages.find(c => c.id === formData.cottage_id)?.isAvailable
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
+          }`}
+        >
+          {isSubmitting ? (
+            <>
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            'Confirm Booking'
+          )}
+        </button>
       </form>
     </div>
   );
