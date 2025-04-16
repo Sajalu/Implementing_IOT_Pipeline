@@ -59,6 +59,7 @@ export const getReservations = async (req, res) => {
 };
 
 // Check cottage availability for specific dates
+// Check cottage availability for specific dates
 export const checkCottageAvailability = async (req, res) => {
   try {
     const { cottage_id, check_in, check_out } = req.query;
@@ -84,12 +85,19 @@ export const getAvailability = async (req, res) => {
     }
     
     const cottages = await getAvailableCottages(check_in, check_out);
-    res.json(cottages);
+    
+    // Transform the data to match what the frontend expects
+    const transformedCottages = cottages.map(cottage => ({
+      id: cottage.cottage_id,
+      name: cottage.name,
+      isAvailable: cottage.is_available
+    }));
+    
+    res.json(transformedCottages);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching availability', error: err.message });
   }
 };
-
 // Get reservations for a specific cottage
 export const getCottageReservations = async (req, res) => {
   try {
