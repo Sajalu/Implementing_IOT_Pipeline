@@ -49,10 +49,16 @@ interface ChartProps {
 // Room name mapping based on device IDs
 const roomNameMapping: Record<string, string> = {
   'device_pilots_son_1': "The Pilot's Son 1",
-  'device_pilots_son_2': "The Pilot's Son 2",
+  'device_pilots_son_2': "The Pilot's Son 2", 
   'device_henry_ford': "Henry Ford Cabin",
   'device_beach_house': "Beach House",
-  'device_grand_lake': "Grand Lake House"
+  'device_grand_lake': "Grand Lake House",
+  'device_1741773230696': "The Pilot's Son 1", // This device is already linked to Pilot's Son 1
+  'device_1741525159393': "The Pilot's Son 2", // Map these devices to appropriate cottages
+  'device_1741525190547': "Henry Ford Cabin",
+  'device_1741770372642': "Beach House",
+  'device_1741772747652': "Grand Lake House",
+  'device_1741772822870': "Grand Lake House 2"
 };
 
 // Demo booking status (would come from a booking service in production)
@@ -255,20 +261,36 @@ const AdminDashboard: React.FC = () => {
 
       // Process the response as usual
       const roomData: RoomData[] = response.map((item: SensorData) => {
-        const deviceId = String(item.device_id || item.id);
-        const timestamp = new Date(item.timestamp);
+  const deviceId = String(item.device_id || item.id);
+  const timestamp = new Date(item.timestamp);
+  
+  // Display logic priority:
+  // 1. Use device name if it has one
+  // 2. Otherwise use name from mapping
+  // 3. Otherwise use a friendly name based on device ID
+  let roomName;
+  
+  if (item.name && item.name.trim() !== '') {
+    // If device has an actual name, use it
+    roomName = item.name;
+  } else if (roomNameMapping[deviceId]) {
+    // If there's a mapping for this device ID, use that
+    roomName = roomNameMapping[deviceId];
+  } else {
+    // Otherwise create a friendly name (Room 1, Room 2, etc.)
+    roomName = `Room ${deviceId.substring(deviceId.lastIndexOf('_') + 1, deviceId.length).substring(0, 4)}`;
+  }
 
-        return {
-          id: deviceId,
-          name: roomNameMapping[deviceId] || `Room ${deviceId}`,
-          temperature: item.temperature || 22.0,
-          humidity: item.humidity || 45,
-          doorStatus: item.door_status ? "open" : "closed",
-          isBooked: demoBookingStatus[deviceId] || false,
-          lastUpdated: timestamp.toLocaleString(),
-        };
-      });
-
+  return {
+    id: deviceId,
+    name: roomName,
+    temperature: item.temperature || 22.0,
+    humidity: item.humidity || 45,
+    doorStatus: item.door_status ? "open" : "closed",
+    isBooked: demoBookingStatus[deviceId] || false,
+    lastUpdated: timestamp.toLocaleString(),
+  };
+});
       setRooms(roomData);
 
       // Handle history data for charts
