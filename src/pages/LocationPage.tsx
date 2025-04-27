@@ -8,14 +8,20 @@ const LocationPage: React.FC = () => {
       
       <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-8 shadow-lg mb-8">
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Map Image */}
-          <div className="rounded-lg overflow-hidden shadow-md">
-            <img 
-              src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1200&h=800" 
-              alt="Finland Map" 
-              className="w-full h-full object-cover"
-            />
-          </div>
+          {/* Map */}
+	  <div className="rounded-lg overflow-hidden shadow-md h-full">
+	    <iframe
+   		 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3121.4125466040928!2d28.252255088567!3d64.74951539719231!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4429d9a556bdc2ed%3A0xd3af084a5a8d296e!2sUkkohallantie%208%2C%2089400%20Hyrynsalmi%2C%20Finland!5e0!3m2!1sen!2sus!4v1745235588307!5m2!1sen!2sus"
+   		 width="100%"
+   		 height="400"
+   		 style={{ border: 0 }}
+   		 allowFullScreen=""
+   		 loading="lazy"
+   		 referrerPolicy="no-referrer-when-downgrade"
+   		 title="Rakkaranta Location Map"
+    		 className="w-full h-full"
+ 	     ></iframe>
+	  </div>
           
           {/* Travel Options */}
           <div className="space-y-6">

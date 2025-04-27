@@ -26,29 +26,6 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Booking Widget */}
-      <div className="relative -mt-24 px-4">
-        <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-xl p-6 grid grid-cols-1 md:grid-cols-5 gap-4">
-          <input type="date" className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded" />
-          <input type="date" className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded" />
-          <select className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded">
-            <option>1 Adult</option>
-            <option>2 Adults</option>
-            <option>3 Adults</option>
-            <option>4 Adults</option>
-          </select>
-          <select className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded">
-            <option>No Kids</option>
-            <option>1 Kid</option>
-            <option>2 Kids</option>
-            <option>3 Kids</option>
-          </select>
-          <button className="bg-[#B68D40] text-white py-3 px-6 rounded hover:bg-[#A67C30] transition-colors">
-            CHECK NOW
-          </button>
-        </div>
-      </div>
-
       {/* Cottages Section */}
       <div className="max-w-7xl mx-auto px-4 py-24">
         <div className="text-center mb-16">
